@@ -69,39 +69,39 @@ header{
 .loading,.error{padding:32px 18px;text-align:center;color:var(--txt2);font-size:13px}
 .error{color:#c85a52}
 
-#sheet-view{display:none;padding-top:111px;min-height:100vh}
-.sheet-nav{
-  background:var(--card);border-bottom:1px solid var(--bd);
-  padding:8px 12px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;
-  position:fixed;top:60px;left:0;right:0;max-width:520px;margin:0 auto;z-index:150;box-shadow:var(--shadow)
+
+/* ── LIGHTBOX QPJB ── */
+.lightbox{
+  display:flex;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.95);
+  flex-direction:column;align-items:center;justify-content:center;overflow:hidden;
+  opacity:0;pointer-events:none;transition:opacity .5s ease;
+  will-change:opacity;-webkit-transform:translateZ(0);transform:translateZ(0)
 }
-.btn-back{
-  border:1.5px solid var(--bd);background:transparent;color:var(--txt);
-  border-radius:8px;padding:7px 10px;font-size:13px;font-weight:600;cursor:pointer
+.lightbox.open{opacity:1;pointer-events:all}
+.lightbox-track{display:flex;align-items:center;justify-content:center;width:100%;height:calc(100vh - 80px);position:relative}
+.lightbox-img{
+  position:absolute;max-width:100%;max-height:100%;object-fit:contain;border-radius:6px;
+  box-shadow:0 8px 40px rgba(0,0,0,.7);
+  transition:transform .3s cubic-bezier(.4,0,.2,1),opacity .3s;will-change:transform
 }
-.nav-center{text-align:center;min-width:0}
-#sheet-counter{font-size:11px;color:var(--txt2)}
-#sheet-title{
-  font:700 12px 'Exo 2',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  max-width:235px;margin:1px auto 0
+.lightbox-close{
+  position:absolute;top:max(env(safe-area-inset-top,0px),14px);right:18px;
+  width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.12);
+  border:none;color:#fff;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:opacity .15s;z-index:3
 }
-.nav-arrows{display:flex;gap:5px}
-.btn-arr{
-  width:36px;height:36px;border-radius:8px;border:none;background:var(--felt);color:#fff;
-  font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer
+.lightbox-nav{
+  position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;
+  background:rgba(255,255,255,.15);border:none;color:#fff;font-size:32px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:background .15s,opacity .15s;z-index:2
 }
-.btn-arr:disabled{background:var(--bd);color:var(--txt3);opacity:.55}
-.sheet-wrap{padding:12px 10px 30px}
-.sheet-card{
-  background:var(--card);border:1px solid var(--bd);border-radius:12px;box-shadow:var(--shadow);
-  overflow:hidden
+.lightbox-nav:hover{background:rgba(255,255,255,.28)}
+.lightbox-prev{left:16px}.lightbox-next{right:16px}
+.lightbox-name{
+  position:absolute;bottom:max(env(safe-area-inset-bottom,0px),14px);left:0;right:0;
+  text-align:center;font-size:12px;color:rgba(255,255,255,.45);padding:0 24px
 }
-#sheet-img{display:block;width:100%;height:auto;background:#fff}
-.open-original{
-  display:block;text-align:center;text-decoration:none;color:var(--txt2);font-size:12px;
-  padding:10px;border-top:1px solid var(--bd)
-}
-.empty-note{padding:14px 18px;color:var(--txt2);font-size:12px;text-align:center}
+
 </style>
 </head>
 <body>
@@ -123,25 +123,17 @@ header{
   <div id="list" class="file-list"><div class="loading">Chargement des fiches…</div></div>
 </main>
 
-<main id="sheet-view">
-  <nav class="sheet-nav">
-    <button class="btn-back" onclick="showList()">‹ Liste</button>
-    <div class="nav-center">
-      <div id="sheet-counter"></div>
-      <div id="sheet-title"></div>
-    </div>
-    <div class="nav-arrows">
-      <button id="prev" class="btn-arr" onclick="move(-1)">‹</button>
-      <button id="next" class="btn-arr" onclick="move(1)">›</button>
-    </div>
-  </nav>
-  <div class="sheet-wrap">
-    <div class="sheet-card">
-      <img id="sheet-img" alt="">
-      <a id="original" class="open-original" href="#" target="_blank" rel="noopener">Ouvrir l'image seule</a>
-    </div>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <button class="lightbox-nav lightbox-prev" id="lightbox-prev" onclick="event.stopPropagation();navLightbox(-1)">‹</button>
+  <div class="lightbox-track" id="lightbox-track" onclick="if(event.target===this)closeLightbox()">
+    <img class="lightbox-img" id="lightbox-img-a" src="" alt="">
+    <img class="lightbox-img" id="lightbox-img-b" src="" alt="" style="opacity:0;pointer-events:none">
   </div>
-</main>
+  <button class="lightbox-nav lightbox-next" id="lightbox-next" onclick="event.stopPropagation();navLightbox(1)">›</button>
+  <div class="lightbox-name" id="lightbox-name"></div>
+</div>
 
 <script>
 const OWNER='CapGui13';
@@ -198,7 +190,7 @@ function renderList(){
   const list=document.getElementById('list');
   list.innerHTML=files.map(function(f,i){
     const x=splitLabel(f.name);
-    return '<div class="file-item" onclick="openSheet('+i+')">'+
+    return '<div class="file-item" onclick="openLightbox('+i+')">'+
       '<div class="file-icon">🔍</div>'+
       '<div class="file-text"><div class="file-name">'+esc(x.title)+'</div>'+
       (x.law?'<div class="file-law">'+esc(x.law)+'</div>':'')+
@@ -221,50 +213,51 @@ async function loadFiles(){
   }
   renderList();
 }
-function openSheet(i){
-  current=i;
-  document.getElementById('list-view').style.display='none';
-  document.getElementById('sheet-view').style.display='block';
-  renderSheet();
-  window.scrollTo(0,0);
-  history.replaceState(null,'','#fiche-'+(current+1));
+let lightboxIdx=0;
+function imgA(){return document.getElementById('lightbox-img-a')}
+function imgB(){return document.getElementById('lightbox-img-b')}
+function lbUpdate(i){
+  document.getElementById('lightbox-name').textContent=cleanName(files[i].name);
+  document.getElementById('lightbox-prev').style.visibility=i>0?'visible':'hidden';
+  document.getElementById('lightbox-next').style.visibility=i<files.length-1?'visible':'hidden';
 }
-function renderSheet(){
-  const f=files[current];
-  const x=splitLabel(f.name);
-  document.getElementById('sheet-counter').textContent='Fiche '+(current+1)+' / '+files.length;
-  document.getElementById('sheet-title').textContent=x.title;
-  const img=document.getElementById('sheet-img');
-  img.src=f.url; img.alt=x.title;
-  document.getElementById('original').href=f.url;
-  document.getElementById('prev').disabled=current===0;
-  document.getElementById('next').disabled=current===files.length-1;
+function resetSlots(){
+  const a=imgA(),b=imgB();
+  a.style.transition='none';a.style.transform='';a.style.opacity='1';
+  b.style.transition='none';b.style.transform='';b.style.opacity='0';b.src='';
 }
-function move(dir){
-  const n=current+dir;
-  if(n<0||n>=files.length)return;
-  current=n;renderSheet();window.scrollTo(0,0);
-  history.replaceState(null,'','#fiche-'+(current+1));
+function openLightbox(i){
+  lightboxIdx=i;resetSlots();imgA().src=files[i].url;lbUpdate(i);
+  const lb=document.getElementById('lightbox');void lb.offsetWidth;lb.classList.add('open');
+  document.body.style.overflow='hidden';
 }
-function showList(){
-  document.getElementById('sheet-view').style.display='none';
-  document.getElementById('list-view').style.display='block';
-  history.replaceState(null,'',location.pathname);
-  window.scrollTo(0,0);
+let _lbBusy=false;
+function navLightbox(dir){
+  if(_lbBusy)return;
+  const next=lightboxIdx+dir;if(next<0||next>=files.length)return;
+  _lbBusy=true;const a=imgA(),b=imgB();
+  b.src=files[next].url;b.style.transition='none';b.style.transform='translateX(0)';b.style.opacity='0';void b.offsetWidth;
+  a.style.transition='opacity .35s ease';a.style.opacity='0';
+  setTimeout(function(){
+    lightboxIdx=next;lbUpdate(next);resetSlots();imgA().src=files[next].url;
+    imgA().style.transition='none';imgA().style.opacity='0';void imgA().offsetWidth;
+    imgA().style.transition='opacity .35s ease';imgA().style.opacity='1';_lbBusy=false;
+  },370);
+}
+function closeLightbox(e){
+  if(e&&e.target!==e.currentTarget&&!e.target.classList.contains('lightbox-close'))return;
+  const lb=document.getElementById('lightbox');lb.classList.remove('open');
+  setTimeout(function(){
+    imgA().src='';imgB().src='';resetSlots();document.body.style.overflow='';
+  },230);
 }
 document.addEventListener('keydown',function(e){
-  if(document.getElementById('sheet-view').style.display!=='block')return;
-  if(e.key==='ArrowLeft')move(-1);
-  if(e.key==='ArrowRight')move(1);
-  if(e.key==='Escape')showList();
+  if(!document.getElementById('lightbox').classList.contains('open'))return;
+  if(e.key==='ArrowLeft')navLightbox(-1);
+  if(e.key==='ArrowRight')navLightbox(1);
+  if(e.key==='Escape')closeLightbox();
 });
-loadFiles().then(function(){
-  const m=location.hash.match(/^#fiche-(\d+)$/);
-  if(m){
-    const i=parseInt(m[1],10)-1;
-    if(i>=0&&i<files.length)openSheet(i);
-  }
-});
+loadFiles();
 </script>
 </body>
 </html>
