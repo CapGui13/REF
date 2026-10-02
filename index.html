@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#141414">
+<title>REF — Fiches d'arbitrage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@600;700;800&family=Source+Serif+4:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --felt:#1a4d2e;--felt-lt:#2e7d4f;--gold:#c8973a;
+  --cream:#faf6ef;--card:#fffdf8;--bd:#e8dfc8;
+  --txt:#1a1410;--txt2:#6b5d4e;--txt3:#b0a090;
+  --shadow:0 2px 8px rgba(0,0,0,.13),0 1px 2px rgba(0,0,0,.07);
+  --r:11px;
+}
+@media(prefers-color-scheme:dark){
+  :root{--cream:#0d1a10;--card:#14200f;--bd:#253820;--txt:#f0ebe0;--txt2:#8aaa88;--txt3:#4a6048;--shadow:0 2px 10px rgba(0,0,0,.5)}
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{background:var(--cream)}
+body{
+  font-family:'Source Serif 4',Georgia,serif;background:var(--cream);color:var(--txt);
+  min-height:100vh;max-width:520px;margin:0 auto;
+}
+button{font:inherit}
+header{
+  background:#141414;padding:max(env(safe-area-inset-top,0px),12px) 18px 12px;
+  display:flex;align-items:center;justify-content:space-between;position:fixed;
+  top:0;left:0;right:0;max-width:520px;margin:0 auto;z-index:200;
+  border-bottom:1px solid rgba(200,151,58,.28);min-height:60px;
+}
+.logo-text{position:absolute;left:50%;transform:translateX(-50%);text-align:center;white-space:nowrap}
+.logo-text h1{font-family:'Exo 2',sans-serif;font-size:16px;font-weight:800;color:#fff;letter-spacing:.4px}
+.logo-text p{font-size:10px;color:rgba(255,255,255,.36);margin-top:1px;letter-spacing:.5px}
+.hd-suits{display:flex;gap:4px;margin-left:auto}
+.hd-suits span{font-size:16px}.s{color:#6b9fd4}.h{color:#d4706a}.d{color:#c8924a}.c{color:#6aaa78}
+
+#list-view{padding-top:60px}
+.hero{
+  background:#202020;color:#fff;padding:20px 18px 17px;border-bottom:1px solid rgba(200,151,58,.15)
+}
+.hero-title{font-family:'Exo 2',sans-serif;font-size:19px;font-weight:800}
+.hero-sub{font-size:12px;color:rgba(255,255,255,.45);margin-top:4px}
+.count{color:var(--gold);font-weight:700}
+
+.file-list{padding:16px 18px 28px;display:flex;flex-direction:column;gap:9px}
+.file-item{
+  background:var(--card);border:1px solid var(--bd);border-radius:var(--r);
+  padding:12px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;
+  box-shadow:var(--shadow);transition:transform .12s,filter .12s;
+}
+.file-item:active{transform:scale(.98);filter:brightness(.96)}
+.file-icon{
+  width:42px;height:42px;border-radius:10px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--felt),var(--felt-lt));
+  display:flex;align-items:center;justify-content:center;font-size:20px
+}
+.file-text{min-width:0;flex:1}
+.file-name{
+  font-weight:700;font-size:14px;font-family:'Exo 2',sans-serif;
+  line-height:1.2;overflow:hidden;text-overflow:ellipsis
+}
+.file-law{font-size:11px;color:var(--txt2);margin-top:3px}
+.chev{color:var(--gold);font-size:21px;flex-shrink:0}
+.loading,.error{padding:32px 18px;text-align:center;color:var(--txt2);font-size:13px}
+.error{color:#c85a52}
+
+#sheet-view{display:none;padding-top:111px;min-height:100vh}
+.sheet-nav{
+  background:var(--card);border-bottom:1px solid var(--bd);
+  padding:8px 12px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;
+  position:fixed;top:60px;left:0;right:0;max-width:520px;margin:0 auto;z-index:150;box-shadow:var(--shadow)
+}
+.btn-back{
+  border:1.5px solid var(--bd);background:transparent;color:var(--txt);
+  border-radius:8px;padding:7px 10px;font-size:13px;font-weight:600;cursor:pointer
+}
+.nav-center{text-align:center;min-width:0}
+#sheet-counter{font-size:11px;color:var(--txt2)}
+#sheet-title{
+  font:700 12px 'Exo 2',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  max-width:235px;margin:1px auto 0
+}
+.nav-arrows{display:flex;gap:5px}
+.btn-arr{
+  width:36px;height:36px;border-radius:8px;border:none;background:var(--felt);color:#fff;
+  font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer
+}
+.btn-arr:disabled{background:var(--bd);color:var(--txt3);opacity:.55}
+.sheet-wrap{padding:12px 10px 30px}
+.sheet-card{
+  background:var(--card);border:1px solid var(--bd);border-radius:12px;box-shadow:var(--shadow);
+  overflow:hidden
+}
+#sheet-img{display:block;width:100%;height:auto;background:#fff}
+.open-original{
+  display:block;text-align:center;text-decoration:none;color:var(--txt2);font-size:12px;
+  padding:10px;border-top:1px solid var(--bd)
+}
+.empty-note{padding:14px 18px;color:var(--txt2);font-size:12px;text-align:center}
+</style>
+</head>
+<body>
+
+<header>
+  <div style="width:54px"></div>
+  <div class="logo-text">
+    <h1>REF</h1>
+    <p>Fiches d'arbitrage</p>
+  </div>
+  <div class="hd-suits"><span class="s">♠</span><span class="h">♥</span><span class="d">♦</span><span class="c">♣</span></div>
+</header>
+
+<main id="list-view">
+  <section class="hero">
+    <div class="hero-title">Références d'arbitrage</div>
+    <div class="hero-sub"><span class="count" id="count">…</span> fiches disponibles</div>
+  </section>
+  <div id="list" class="file-list"><div class="loading">Chargement des fiches…</div></div>
+</main>
+
+<main id="sheet-view">
+  <nav class="sheet-nav">
+    <button class="btn-back" onclick="showList()">‹ Liste</button>
+    <div class="nav-center">
+      <div id="sheet-counter"></div>
+      <div id="sheet-title"></div>
+    </div>
+    <div class="nav-arrows">
+      <button id="prev" class="btn-arr" onclick="move(-1)">‹</button>
+      <button id="next" class="btn-arr" onclick="move(1)">›</button>
+    </div>
+  </nav>
+  <div class="sheet-wrap">
+    <div class="sheet-card">
+      <img id="sheet-img" alt="">
+      <a id="original" class="open-original" href="#" target="_blank" rel="noopener">Ouvrir l'image seule</a>
+    </div>
+  </div>
+</main>
+
+<script>
+const OWNER='CapGui13';
+const REPO='REF';
+const FALLBACK=[
+'01_Passe_hors_tour_Loi_30.png',
+'02_Enchere_hors_tour_Loi_31.png',
+'03_X_XX_hors_tour_Loi_32.png',
+'04_Enchere_insuffisante_Loi_27.png',
+'05_Renonce_Lois_62_63.png',
+'06_Renonce_consommee_Loi_64.png',
+'07_Cartes_penalisees_Lois_49_50.png',
+'08_Cartes_penalisees_Lois_50_51.png',
+'09_Entame_hors_tour_Lois_53_54.png',
+'10_Changement_de_declaration_Loi_25.png',
+'Arbitrage avec écrans.png',
+'Attaque et jeu prématuré (loi 57).png',
+'Carte exposée pendant les annonces (loi 24).png',
+'Cartes simultanées (loi 58).png',
+'Déclaration comparable (loi 23).png',
+"Déclaration retirée, pénalités d'attaque (loi 26).png",
+'Entame HT avec écran.png',
+"Erreur d'application ou d'explication (lois 40 & 75).png"
+];
+
+let files=[];
+let current=0;
+
+function rawUrl(name){
+  return 'https://raw.githubusercontent.com/'+OWNER+'/'+REPO+'/main/'+encodeURIComponent(name).replace(/%2F/g,'/');
+}
+function esc(s){
+  return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]});
+}
+function naturalSort(a,b){
+  const na=(a.match(/^\d+/)||['999'])[0], nb=(b.match(/^\d+/)||['999'])[0];
+  const da=parseInt(na,10), db=parseInt(nb,10);
+  if(da!==db)return da-db;
+  return a.localeCompare(b,'fr',{numeric:true,sensitivity:'base'});
+}
+function cleanName(name){
+  let s=name.replace(/\.png$/i,'').replace(/^\d+[_ -]*/,'').replace(/_/g,' ');
+  s=s.replace(/\s+/g,' ').trim();
+  return s;
+}
+function splitLabel(name){
+  const title=cleanName(name);
+  const m=title.match(/^(.*?)(?:\s*[-–—,]?\s*)(\(?lois?\s+[\d &]+\)?)$/i);
+  if(m)return {title:m[1].trim(),law:m[2].replace(/^\(/,'').replace(/\)$/,'')};
+  return {title:title,law:''};
+}
+function renderList(){
+  document.getElementById('count').textContent=files.length;
+  const list=document.getElementById('list');
+  list.innerHTML=files.map(function(f,i){
+    const x=splitLabel(f.name);
+    return '<div class="file-item" onclick="openSheet('+i+')">'+
+      '<div class="file-icon">🔍</div>'+
+      '<div class="file-text"><div class="file-name">'+esc(x.title)+'</div>'+
+      (x.law?'<div class="file-law">'+esc(x.law)+'</div>':'')+
+      '</div><div class="chev">›</div></div>';
+  }).join('');
+}
+async function loadFiles(){
+  try{
+    const r=await fetch('https://api.github.com/repos/'+OWNER+'/'+REPO+'/contents/');
+    if(!r.ok)throw new Error('GitHub '+r.status);
+    const data=await r.json();
+    files=data.filter(function(f){
+      return f.type==='file' && /\.png$/i.test(f.name);
+    }).map(function(f){
+      return {name:f.name,url:f.download_url||rawUrl(f.name)};
+    }).sort(function(a,b){return naturalSort(a.name,b.name)});
+    if(!files.length)throw new Error('Aucune image');
+  }catch(e){
+    files=FALLBACK.map(function(name){return {name:name,url:rawUrl(name)}});
+  }
+  renderList();
+}
+function openSheet(i){
+  current=i;
+  document.getElementById('list-view').style.display='none';
+  document.getElementById('sheet-view').style.display='block';
+  renderSheet();
+  window.scrollTo(0,0);
+  history.replaceState(null,'','#fiche-'+(current+1));
+}
+function renderSheet(){
+  const f=files[current];
+  const x=splitLabel(f.name);
+  document.getElementById('sheet-counter').textContent='Fiche '+(current+1)+' / '+files.length;
+  document.getElementById('sheet-title').textContent=x.title;
+  const img=document.getElementById('sheet-img');
+  img.src=f.url; img.alt=x.title;
+  document.getElementById('original').href=f.url;
+  document.getElementById('prev').disabled=current===0;
+  document.getElementById('next').disabled=current===files.length-1;
+}
+function move(dir){
+  const n=current+dir;
+  if(n<0||n>=files.length)return;
+  current=n;renderSheet();window.scrollTo(0,0);
+  history.replaceState(null,'','#fiche-'+(current+1));
+}
+function showList(){
+  document.getElementById('sheet-view').style.display='none';
+  document.getElementById('list-view').style.display='block';
+  history.replaceState(null,'',location.pathname);
+  window.scrollTo(0,0);
+}
+document.addEventListener('keydown',function(e){
+  if(document.getElementById('sheet-view').style.display!=='block')return;
+  if(e.key==='ArrowLeft')move(-1);
+  if(e.key==='ArrowRight')move(1);
+  if(e.key==='Escape')showList();
+});
+loadFiles().then(function(){
+  const m=location.hash.match(/^#fiche-(\d+)$/);
+  if(m){
+    const i=parseInt(m[1],10)-1;
+    if(i>=0&&i<files.length)openSheet(i);
+  }
+});
+</script>
+</body>
+</html>
