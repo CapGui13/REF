@@ -139,6 +139,7 @@ header{
 const OWNER='CapGui13';
 const REPO='REF';
 const FALLBACK=[
+'00_Patton_Suisse_Feuille_de_route.svg',
 '01_Passe_hors_tour_Loi_30.png',
 '02_Enchere_hors_tour_Loi_31.png',
 '03_X_XX_hors_tour_Loi_32.png',
@@ -175,7 +176,7 @@ function naturalSort(a,b){
   return a.localeCompare(b,'fr',{numeric:true,sensitivity:'base'});
 }
 function cleanName(name){
-  let s=name.replace(/\.png$/i,'').replace(/^\d+[_ -]*/,'').replace(/_/g,' ');
+  let s=name.replace(/\.(png|svg)$/i,'').replace(/^\d+[_ -]*/,'').replace(/_/g,' ');
   s=s.replace(/\s+/g,' ').trim();
   return s;
 }
@@ -203,7 +204,7 @@ async function loadFiles(){
     if(!r.ok)throw new Error('GitHub '+r.status);
     const data=await r.json();
     files=data.filter(function(f){
-      return f.type==='file' && /\.png$/i.test(f.name);
+      return f.type==='file' && /\.(png|svg)$/i.test(f.name);
     }).map(function(f){
       return {name:f.name,url:f.download_url||rawUrl(f.name)};
     }).sort(function(a,b){return naturalSort(a.name,b.name)});
