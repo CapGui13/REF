@@ -140,6 +140,7 @@ const OWNER='CapGui13';
 const REPO='REF';
 const FALLBACK=[
 '00_Patton_Suisse_Feuille_de_route.svg',
+'Patton_Suisse_FDR_B.svg',
 '01_Passe_hors_tour_Loi_30.png',
 '02_Enchere_hors_tour_Loi_31.png',
 '03_X_XX_hors_tour_Loi_32.png',
@@ -170,12 +171,18 @@ function esc(s){
   return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]});
 }
 function naturalSort(a,b){
-  const na=(a.match(/^\d+/)||['999'])[0], nb=(b.match(/^\d+/)||['999'])[0];
-  const da=parseInt(na,10), db=parseInt(nb,10);
-  if(da!==db)return da-db;
+  const priority=function(name){
+    if(name==='00_Patton_Suisse_Feuille_de_route.svg') return 0;
+    if(name==='Patton_Suisse_FDR_B.svg') return 1;
+    const m=name.match(/^\d+/);
+    return m ? 100+parseInt(m[0],10) : 999;
+  };
+  const pa=priority(a), pb=priority(b);
+  if(pa!==pb)return pa-pb;
   return a.localeCompare(b,'fr',{numeric:true,sensitivity:'base'});
 }
 function cleanName(name){
+  if(name==='Patton_Suisse_FDR_B.svg') return 'Patton Suisse FDR B';
   let s=name.replace(/\.(png|svg)$/i,'').replace(/^\d+[_ -]*/,'').replace(/_/g,' ');
   s=s.replace(/\s+/g,' ').trim();
   return s;
